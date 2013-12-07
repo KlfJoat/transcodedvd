@@ -1,0 +1,176 @@
+#!/bin/bash
+# From https://bbs.archlinux.org/viewtopic.php?id=66934
+
+#CONFIGURATION
+DIN="/dev/dvd" #input
+DOUT="/home/$USER/tmp" #output
+VBTR="4000" #bitrate
+ABTR="192" #bitrate
+FFRM="mp4" #file format: mp4/avi/ogm/mkv
+VLE="x264" #video encoder: ffmpeg/xvid/x264/theora
+CUP="0" #clean files when finished (DOUT/.rdvdpseries not removed)
+    
+discinfo(){
+    TITLE[INDEX]=`dvdbackup -i ${DIN} -I | grep information | cut -c44-56`
+    TNUM[INDEX]=`dvdbackup -i ${DIN} -I | grep containing | cut -c43-45`
+}
+
+discchange(){
+    let INDEXA=DISC-1
+    if [ "$INDEX" -ne "$INDEXA" ]; then 
+        echo "...ejecting disc..."
+        eject
+        read -p "please insert the next disc [enter]" CHNG
+    fi
+}
+
+dvdbkup(){
+    while [ $INDEX -lt $DISC ]; do    
+        discinfo        
+        dvdbackup -i ${DIN} -o ${DOUT} -M
+        discchange
+        let INDEX=INDEX+1    
+    done
+
+    INDEX=0
+    while [ $INDEX -lt $DISC ]; do
+        handbrake -i ${DOUT}/${TITLE[INDEX]}VIDEO_TS -o ${DOUT}/${TITLE[INDEX]}.${FFRM} -t ${TNUM[INDEX]} -U -F -f ${FFRM} -e ${VLE} -b ${VBTR} -B ${ABTR}
+        if [ $CUP = "1" ]; then
+            rm -rf ${DOUT}/${TITLE[INDEX]}
+        fi
+        let INDEX=INDEX+1
+    done
+exit
+}
+
+hndbrk(){
+    while [ $INDEX -lt $DISC ]; do    
+        discinfo        
+        handbrake -i ${DIN} -o ${DOUT}/${TITLE[INDEX]}.${FFRM} -t ${TNUM[INDEX]} -U -F -f ${FFRM} -e ${VLE} -b ${VBTR} -B ${ABTR}
+        discchange
+        let INDEX=INDEX+1    
+    done    
+exit
+}
+
+series(){
+    echo "...displaying info..."; sleep 2
+    dvdbackup -i ${DIN} -I > ${DOUT}/file
+    cat ${DOUT}/file 2>/dev/null
+        
+    sleep 2
+    read -p "number of episodes: " NUME
+    title
+    
+    INDEX=0
+    while [ $INDEX -lt $NUME ]; do
+        let INDEXA=INDEX+1
+        read -p "Episode [${INDEXA} / ${NUME}] name: " SNME[INDEX]
+        SNME[$INDEX]=${SNME[$INDEX]// /_} #replace ' ' with '_'
+        read -p "Episode [${INDEXA} / ${NUME}] title: " STTL[INDEX]
+        read -p "Episode [${INDEXA} / ${NUME}] chapter(s): " SCHP[INDEX]
+        echo
+        let INDEX=INDEX+1
+    done
+    
+    title
+    echo "verify the following: "; sleep 1
+    INDEX=0
+    while [ $INDEX -lt $NUME ]; do
+        let INDEXA=INDEX+1
+        echo "=============================================="
+        echo "Episode [${INDEXA} / ${NUME}] name: ${SNME[INDEX]}"
+        echo "Episode [${INDEXA} / ${NUME}] title: ${STTL[INDEX]}"
+        echo "Episode [${INDEXA} / ${NUME}] chapter(s): ${SCHP[INDEX]}"
+        echo 
+        let INDEX=INDEX+1
+    done
+        
+    read -p "proceed [Y\n]: " PROC
+    if [ -n $PROC ]; then
+        if [ $PROC = "n" ]; then
+            series
+        fi
+    fi
+    
+    if [ $CUP = "1" ]; then
+        rm ${DOUT}/file
+    fi
+    echo "...dump to ${DOUT}/.rdvdpseries..."; sleep 1
+
+    INDEX=0
+    touch ${DOUT}/.rdvdpseries
+    while [ $INDEX -lt $NUME ]; do
+        echo "handbrake -i ${DIN} -o ${DOUT}/${SNME[INDEX]}.${FFRM} -t ${STTL[INDEX]} -c ${SCHP[INDEX]} -U -F -f ${FFRM} -e ${VLE} -b ${VBTR} -B ${ABTR}" >> ${DOUT}/.rdvdpseries
+        let INDEX=INDEX+1
+    done
+        
+    title
+    echo "about to start series mode"
+    sleep 3
+    
+    INDEX=0
+    while [ $INDEX -lt $NUME ]; do
+        handbrake -i ${DIN} -o ${DOUT}/${SNME[INDEX]}.${FFRM} -t ${STTL[INDEX]} -c ${SCHP[INDEX]} -U -F -f ${FFRM} -e ${VLE} -b ${VBTR} -B ${ABTR}
+        let INDEX=INDEX+1
+    done    
+exit
+}    
+
+title(){
+    clear
+    echo
+    echo "          _          _       "
+    echo "         | |        | |      "
+    echo "  _ __ __| |_   ____| |_ __  "
+    echo " |  __/ _  \ \ / / _  |  _ \ "
+    echo " | | | (_| |\ V / (_| | |_) |"
+    echo " |_|  \__ _| \_/ \__ _|  __/ "
+    echo "                      | |    "
+    echo "                      |_|    "
+    echo
+    echo " It's Automatic! version: 0.2.1"
+    echo
+}
+
+run(){
+    if [ $RUN = "1" ]; then
+        dvdbkup
+    else
+        hndbrk
+    fi
+}
+
+main(){
+    RUN=0 
+    INDEX=0 
+    DISC=1 
+    title
+    read -p "dvdbackup mode [N/y]: " DBP
+    read -p "multi-disc mode [N/y]: " MDM
+    read -p "series mode [N/y]: " SSM
+    
+    if [ -n "$DBP" ]; then
+        if [ $DBP = "y" ]; then
+            RUN=1
+        fi
+    fi
+    
+    if [ -n "$MDM" ]; then
+        if [ $MDM = "y" ]; then
+            echo
+            read -p "enter the number of discs: " DISC
+            run
+        fi
+    fi
+    
+    if [ -n "$SSM" ]; then
+        if [ $SSM = "y" ]; then
+            series
+        fi
+    fi
+
+    run
+}
+
+main
