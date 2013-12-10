@@ -203,10 +203,10 @@ for thetitle in "${thetitles[@]}"; do
             (( extraind++ ))
         fi
         outfile=$final_output_dir/${movie_title}${extrafilestuff}.$HANDBRAKE_OUTPUT_FORMAT
-        handbrake_cmd="$HANDBRAKE_BASE_CMD --output $outfile --title $titleid"
+        handbrake_cmd="HandBrakeCLI --input \"$output_iso\" --preset \"$HANDBRAKE_PROFILE\" --output $outfile --title $titleid"
         echo "ripping title $titleid with the following command:"
         echo $handbrake_cmd
-        $handbrake_cmd >> $logfile 2>&1
+        HandBrakeCLI --input "$output_iso" --preset "$HANDBRAKE_PROFILE" --output "$outfile" --title $titleid >> $logfile 2>&1
         grep -q "No title found" $logfile
         [[ $? -eq 0 ]] && {
             echo
