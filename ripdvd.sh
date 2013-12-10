@@ -30,6 +30,7 @@ EOF
 DVDDEVICE=${1:-/dev/sr0}
 OUTPUTDIR=${OUTPUTDIR:-/home/klfjoat/tmp}
 DORIP=${DORIP:-yes}
+# Android, Android Tablet (size constrained); Normal, High Profile (quality constraint)
 HANDBRAKE_PROFILE=${HANDBRAKE_PROFILE:-"High Profile"}
 HANDBRAKE_OUTPUT_FORMAT=${HANDBRAKE_OUTPUT_FORMAT:-mp4}
 
@@ -45,19 +46,19 @@ done
 [[ $found_everything = yes ]] || exit 1
 
 
-if ! lsdvd $DVDDEVICE > /dev/null 2>&1; then
+if ! lsdvd "$DVDDEVICE" > /dev/null 2>&1; then
     echo "Couldn't find dvd in $DVDDEVICE"
     exit 1
 fi
 
-movie_title=$(lsdvd $DVDDEVICE 2>/dev/null | grep 'Disc Title' | awk '{print $3}')
+movie_title=$(lsdvd "$DVDDEVICE" 2>/dev/null | grep 'Disc Title' | awk '{print $3}')
 
 final_output_dir=$OUTPUTDIR/$movie_title
 mkdir -p $final_output_dir
 output_iso=$final_output_dir/${movie_title}.iso
 # set output iso to dvd device if they gave an ISO
 if [[ $DVDDEVICE =~ .iso$ ]]; then
-    output_iso=$DVDDEVICE
+    output_iso="$DVDDEVICE"
     DORIP=no
 fi
 
@@ -65,7 +66,7 @@ fi
 thetitles=()
 while read -r -d $'\0'; do
     thetitles+=("$REPLY")
-done < <(lsdvd $DVDDEVICE 2>/dev/null | grep -e '^Title:' | tr '\n' '\0')
+done < <(lsdvd "$DVDDEVICE" 2>/dev/null | grep -e '^Title:' | tr '\n' '\0')
 
 # initialize the willrip and ismainfeature arrays
 titleid=1
@@ -156,7 +157,7 @@ while : ; do
             fi
             ;;
         p*)
-            mplayer dvd://${selection:1}/$DVDDEVICE
+            mplayer dvd://${selection:1}/"$DVDDEVICE"
             ;;
         q)
             echo "Bye"
@@ -171,18 +172,18 @@ while : ; do
 done
 
 
-if [[ -e $output_iso && $DORIP == yes ]]; then
+if [[ -e "$output_iso" && $DORIP == yes ]]; then
     read -p "$output_iso already exists. Do you really want to rip the iso again? [y/n] " DORIP
 fi
 
 if [[ ! $DORIP =~ ^[nN] ]]; then
     echo "saving the DVD iso to ${output_iso}..."
     # TODO: dd is ebil!  Change this.
-    dd if=$DVDDEVICE | pv > $output_iso
+    dd if="$DVDDEVICE" | pv > "$output_iso"
 fi
 
 
-HANDBRAKE_BASE_CMD="HandBrakeCLI --input $output_iso --preset $HANDBRAKE_PROFILE"
+HANDBRAKE_BASE_CMD="HandBrakeCLI --input \"$output_iso\" --preset \"$HANDBRAKE_PROFILE\""
 
 logfile=$(mktemp)
 
