@@ -37,7 +37,7 @@ HANDBRAKE_OUTPUT_FORMAT=${HANDBRAKE_OUTPUT_FORMAT:-mkv}
 
 # check for some necessary programs
 found_everything=yes
-for required_prog in lsdvd HandBrakeCLI; do
+for required_prog in pv lsdvd HandBrakeCLI; do
     which $required_prog >/dev/null 2>&1
     [[ $? -eq 0 ]] || {
         echo "Couldn't find the \`$required_prog' utility. Please install it and try again."
