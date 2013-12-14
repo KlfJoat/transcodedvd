@@ -1,5 +1,6 @@
 #!/bin/bash
 # From https://github.com/mgalgs/scripts/blob/69277bce15c450657bfb947c7979b9d8cf500d7f/ripdvd.sh
+# FYI https://trac.handbrake.fr/wiki/HandBrakeGuide
 
 # usage
 if [[ $1 == "-h" || $1 == "--help" || $# -gt 2 ]]; then
