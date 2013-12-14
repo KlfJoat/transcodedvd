@@ -32,7 +32,8 @@ OUTPUTDIR=${OUTPUTDIR:-/home/klfjoat/tmp}
 DORIP=${DORIP:-yes}
 # Android, Android Tablet (size constrained); Normal, High Profile (quality constraint)
 HANDBRAKE_PROFILE=${HANDBRAKE_PROFILE:-"High Profile"}
-HANDBRAKE_OUTPUT_FORMAT=${HANDBRAKE_OUTPUT_FORMAT:-mp4}
+# mp4, m4v, mkv
+HANDBRAKE_OUTPUT_FORMAT=${HANDBRAKE_OUTPUT_FORMAT:-mkv}
 
 # check for some necessary programs
 found_everything=yes
