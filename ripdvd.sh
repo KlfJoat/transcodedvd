@@ -31,7 +31,9 @@ EOF
 DVDDEVICE=${1:-/dev/sr0}
 OUTPUTDIR=${OUTPUTDIR:-/home/klfjoat/tmp}
 DORIP=${DORIP:-yes}
-# Android, Android Tablet (size constrained); Normal, High Profile (quality constraint)
+# Android, An
+
+droid Tablet (size constrained); Normal, High Profile (quality constraint)
 HANDBRAKE_PROFILE=${HANDBRAKE_PROFILE:-"High Profile"}
 # mp4, m4v, mkv
 HANDBRAKE_OUTPUT_FORMAT=${HANDBRAKE_OUTPUT_FORMAT:-mkv}
@@ -127,7 +129,7 @@ while : ; do
                     willrip[$myind]=$xval
                     (( myind++ ))
                 done
-            else
+            else # TODO: BUG!  It won't toggle anything besides id 1!!! Brush up on my bash arrays!
                 # they specified N (in ${selection:1}). toggle selection.
                 if [[ "${willrip[${selection:1}]}" == "x" ]]; then
                     willrip[${selection:1}]=""
