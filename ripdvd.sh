@@ -31,9 +31,7 @@ EOF
 DVDDEVICE=${1:-/dev/sr0}
 OUTPUTDIR=${OUTPUTDIR:-/home/klfjoat/tmp}
 DORIP=${DORIP:-yes}
-# Android, An
-
-droid Tablet (size constrained); Normal, High Profile (quality constraint)
+# Android, Android Tablet (size constrained); Normal, High Profile (quality constraint)
 HANDBRAKE_PROFILE=${HANDBRAKE_PROFILE:-"High Profile"}
 # mp4, m4v, mkv
 HANDBRAKE_OUTPUT_FORMAT=${HANDBRAKE_OUTPUT_FORMAT:-mkv}
