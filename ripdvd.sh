@@ -1,5 +1,6 @@
 #!/bin/bash
 # From https://github.com/mgalgs/scripts/blob/69277bce15c450657bfb947c7979b9d8cf500d7f/ripdvd.sh
+# FYI https://trac.handbrake.fr/wiki/HandBrakeGuide
 
 # usage
 if [[ $1 == "-h" || $1 == "--help" || $# -gt 2 ]]; then
@@ -32,11 +33,12 @@ OUTPUTDIR=${OUTPUTDIR:-/home/klfjoat/tmp}
 DORIP=${DORIP:-yes}
 # Android, Android Tablet (size constrained); Normal, High Profile (quality constraint)
 HANDBRAKE_PROFILE=${HANDBRAKE_PROFILE:-"High Profile"}
-HANDBRAKE_OUTPUT_FORMAT=${HANDBRAKE_OUTPUT_FORMAT:-mp4}
+# mp4, m4v, mkv
+HANDBRAKE_OUTPUT_FORMAT=${HANDBRAKE_OUTPUT_FORMAT:-mkv}
 
 # check for some necessary programs
 found_everything=yes
-for required_prog in lsdvd HandBrakeCLI; do
+for required_prog in pv lsdvd HandBrakeCLI; do
     which $required_prog >/dev/null 2>&1
     [[ $? -eq 0 ]] || {
         echo "Couldn't find the \`$required_prog' utility. Please install it and try again."
